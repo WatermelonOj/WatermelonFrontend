@@ -25,6 +25,13 @@ module.exports = {
         pathRewrite: {
           '^/pro': '/'
         }
+      },
+      '/apii': {
+        target: 'ws://39.106.167.190:8081',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/apii': '/'
+        }
       }
     },
 
@@ -59,7 +66,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: './',
 
     /**
      * Source Maps

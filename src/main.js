@@ -10,14 +10,19 @@ import element from './element/index'
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'
 import 'vue-awesome/icons'
 import Icon from 'vue-awesome/components/Icon'
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+import echarts from 'echarts'
 
-
+Vue.prototype.$echarts = echarts
 Vue.component('icon', Icon)
 Vue.use(element)
 Vue.config.productionTip = false
 Vue.prototype.axios = axios;
 Vue.component(CollapseTransition.name, CollapseTransition)
 
+router.afterEach((to,from,next) => {
+  window.scrollTo(0,0);
+})
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

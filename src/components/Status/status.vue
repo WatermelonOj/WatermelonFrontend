@@ -1,6 +1,6 @@
 <template>
-  <!-- -->
-  <div class="back">
+  <div style="margin-top: 10%;position: absolute;width: 100%">
+  <el-card class="statusBack">
     <div style="margin-left: 50px;margin-top: 20px;font-size: 30px;"><span>Status</span></div>
     <table style="text-align: center" class="tableBg" v-loading="loading">
       <tr class="firstTr">
@@ -14,15 +14,8 @@
       </tr>
       <tr v-for="item in data" :key="item.subId">
         <td>{{ item.subTime }}</td>
-        <td>{{ item.userId }}</td>
-        <td><router-link :to="{
-              name:'problem',
-              query: {
-                name:'problem',
-                dataObj: item
-              }
-            }" style="text-decoration-line: none;">
-          <el-link :underline="false">{{ item.problemId }}</el-link></router-link></td>
+        <td><el-link :underline="false" @click.native="toUserHome(item.username,item.userId)">{{ item.username }}</el-link></td>
+        <td>{{ item.problemId }}</td>
         <td><el-tag effect="dark" style="border: 0;height: 30px" :color="resultColor(item.result)" >{{ item.result }}</el-tag></td>
         <td>{{ item.runTime }} MS</td>
         <td>{{ item.runMemory }} KB</td>
@@ -46,10 +39,13 @@
         @current-change="updatePage">
       </el-pagination>
     </div>
+  </el-card>
+    <logo></logo>
   </div>
 </template>
 
 <script>
+  import logo from "../Other/logo";
     export default {
       name: "status",
       data(){
@@ -60,6 +56,7 @@
             totalPage:0
           }
       },
+      components:{ logo },
       async created() {
         this.data = (await this.axios.get('/api/submission/all', {
           params: {
@@ -67,8 +64,15 @@
           }
         })).data;
         this.totalPage = (await this.axios.get('/api/submission/count')).data;
-        setInterval(this.update,3000);
         this.loading = false;
+      },
+      mounted() {
+        if (sessionStorage.getItem("userId") ) { var userId = sessionStorage.getItem('userId'); }
+        this.websocket = new WebSocket("ws://39.106.167.190:8080/judgeHandler/ID="+userId)
+        this.initWebSocket()
+      },
+      beforeDestroy () {
+        this.onbeforeunload()
       },
       methods: {
         async update(){
@@ -88,6 +92,15 @@
           });
           this.data = res.data;
         },
+        toUserHome(username,userId){
+          this.$router.push({
+            name:'UserHome',
+            params:{
+              username:username,
+              userId:userId
+            }
+          })
+        },
         resultColor(res){
           var col='';
           if (res == 'Accept') { col = '#32CD32' }
@@ -95,19 +108,33 @@
           else if (res == 'Judging' || res == 'Queuing' || res == 'Compiling'){ col = '#00BFFF' }
           else { col = '#FF4500' }
           return col;
+        },
+        initWebSocket () {
+          this.websocket.onerror = this.setErrorMessage
+          this.websocket.onmessage = this.setOnmessageMessage
+          window.onbeforeunload = this.onbeforeunload
+        },
+        setOnmessageMessage (event) {
+          if(event.data == 'submission'){
+            this.update();
+          }
+          console.log('服务端返回：' + event.data)
+        },
+        setErrorMessage () {
+          console.log('WebSocket连接发生错误   状态码：' + this.websocket.readyState)
+        },
+        onbeforeunload () {
+          this.websocket.close();
         }
       }
     }
 </script>
 
 <style scoped>
-  .back{
+  .statusBack{
     width: 94%;
     background: white;
-    position: absolute;
     margin-left: 3%;
-    margin-top: 70px;
-    margin-bottom: 100px;
   }
   table{
     width: 94%;

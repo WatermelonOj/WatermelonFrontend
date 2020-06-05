@@ -11,58 +11,115 @@ import code from "./components/Status/code";
 import contestProblem from "./components/Contest/contestProblem";
 import contestRank from "./components/Contest/contestRank";
 import UserHome from "./components/User/UserHome";
+import menu from "./components/Menu/menu";
+import login from "./components/Login/login";
+import register from "./components/Register/register";
+import Watermelon from "./components/Welcome/Watermelon";
+import disHome from "./components/Discussion/disHome";
+import write from "./components/Discussion/write";
+import about from "./components/Other/about";
+import comment from "./components/Discussion/comment";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path:"/home",
-    component: home
+    path:"/login",
+    name:'login',
+    component: login
   },
   {
-    path:"/code",
-    name:'code',
-    component: code
+    path:"/register",
+    name:'register',
+    component: register
   },
   {
-    path:"/UserHome",
-    name:'UserHome',
-    component: UserHome
+    path:"/Watermelon",
+    name:'Watermelon',
+    component: Watermelon
   },
   {
-    path:"/contestProblem",
-    name:'contestProblem',
-    component: contestProblem
+    path:"/menu",
+    name:'menu',
+    redirect:'/home',
+    component: menu,
+    children: [
+      {
+        path:"/home",
+        name:'home',
+        component: home
+      },
+      {
+        path:"/code",
+        name:'code',
+        component: code
+      },
+      {
+        path:"/UserHome",
+        name:'UserHome',
+        component: UserHome
+      },
+      {
+        path:"/contestProblem",
+        name:'contestProblem',
+        component: contestProblem
+      },
+      {
+        path:"/contestRank",
+        name:'contestRank',
+        component: contestRank
+      },
+      {
+        path:"/status",
+        name:'status',
+        component: status
+      },
+      {
+        path: "/contest",
+        name:'contest',
+        component: contest
+      },
+      {
+        path: "/problemset",
+        name:'problemset',
+        component: problemset
+      },
+      {
+        path: "/discussion",
+        name:'discussion',
+        component: discussion
+      },
+      {
+        path: "/problem",
+        name: 'problem',
+        component: problem
+      }
+      ,
+      {
+        path: "/disHome",
+        name: 'disHome',
+        component: disHome
+      },
+      {
+        path: "/write",
+        name: 'write',
+        component: write
+      },
+      {
+        path: "/about",
+        name: 'about',
+        component: about
+      },
+      {
+        path: "/comment",
+        name: 'comment',
+        component: comment
+      }
+      ]
   },
   {
-    path:"/contestRank",
-    name:'contestRank',
-    component: contestRank
-  },
-  {
-    path:"/status",
-    component: status
-  },
-  {
-    path: "/contest",
-    component: contest
-  },
-  {
-    path: "/problemset",
-    component: problemset
-  },
-  {
-    path: "/discussion",
-    component: discussion
-  },
-  {
-    path: "/problem",
-    name: 'problem',
-    component: problem
-  },
-  {
-    path: '/',
-    redirect: '/home'
+    path: "/",
+    redirect:'/Watermelon'
   }
 ]
 
