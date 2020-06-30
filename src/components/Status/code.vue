@@ -4,7 +4,7 @@
       <h1 style="font-weight: normal;">Code</h1>
     </div>
     <div class="code">
-      <h4 style="font-weight: normal;color: #3a8ee6">Author : 100</h4>
+      <h4 style="font-weight: normal;color: #3a8ee6">Author : {{ data.username }}</h4>
       <h4 style="font-weight: normal;color: #3a8ee6">Problem : {{ data.problemId }}</h4>
       <h4 style="font-weight: normal;color: #3a8ee6">Result : {{ data.result }}</h4>
       <markdown-it-vue :content="data.code" style="font-size: 20px"/>
@@ -24,19 +24,17 @@
     },
     created() {
       let routerParams = this.$route.params.dataObj;
-      console.log(routerParams);
       if(routerParams){
         this.data = routerParams;
         this.data.code = '```\n' + this.data.code + '\n' + '```'
       }
-
-      if (sessionStorage.getItem("code") ) {
+      else if (sessionStorage.getItem('code') ) {
         var userJsonStr = sessionStorage.getItem('code');
         this.data = JSON.parse(userJsonStr);
       }
-      window.addEventListener("beforeunload",()=>{
+      if(this.data){
         sessionStorage.setItem("code",JSON.stringify(this.data))
-      })
+      }
     },
     methods:{
       result(res){
@@ -55,7 +53,7 @@
     background: white;
     position: absolute;
     margin-left: 15%;
-    margin-top: 100px;
+    margin-top: 155px;
     margin-bottom: 50px;
   }
   .code{

@@ -1,5 +1,8 @@
 <template>
-  <div class="back">
+  <el-card class="rankBack">
+    <el-row :style="{ padding:'20px 30px' }">
+      <span style="font-size: 35px">{{ this.title }}</span>
+    </el-row>
     <table style="text-align: center;font-weight: bold;">
       <tr class="firstTr">
         <td width="8%">Rank</td>
@@ -12,79 +15,105 @@
         <td width="12%">D</td>
         <td width="12%">E</td>
       </tr>
-      <tr v-for="item in list" :key="item.rank">
+      <tr v-for="item in rank" :key="item.rankId">
         <td>{{ item.rank }}</td>
-        <td>{{ item.userName }}</td>
+        <td>{{ item.username }}</td>
         <td>{{ item.solve }}</td>
         <td>{{ item.time }}</td>
-        <td v-for="items in item.problem" :bgcolor="resultColor(items.result)" style="line-height: 25px">
-          <span v-show="items.result==0">0<br>--</span>
-          <span v-show="items.result==1">{{ items.num }}<br>{{ items.time }}</span>
-          <span v-show="items.result==2">{{ items.num }}<br>--</span>
-          <span v-show="items.result==3" style="color: white">{{ items.num }}<br>{{ items.time }}</span>
+        <td v-for="items in item.problem" :bgcolor="resultColor(items.status)" style="line-height: 25px">
+          <span v-show="items.status==-1">0<br>--</span>
+          <span v-show="items.status==1">{{ items.tries }}<br>{{ items.time }}</span>
+          <span v-show="items.status==0">{{ items.tries }}<br>--</span>
+          <span v-show="items.status==3" style="color: white">{{ items.tries }}<br>{{ items.time }}</span>
         </td>
       </tr>
     </table>
-  </div>
+  </el-card>
 </template>
 
 <script>
   export default {
     data(){
-      return{
-        list:[{ rank:1, userName:'admin', solve:4, time:1235,
-          problem:[{ result:1, time:15, num:3 },
-            { result:3, time:6, num:1 },
-            { result:1, time:37, num:2 },
-            { result:2, time:0, num:7 },
-            { result:1, time:156, num:6 } ]},
-          { rank:2, userName:'UPC', solve:3, time:456,
-            problem:[{ result:3, time:7, num:2 },
-              { result:1, time:26, num:1 },
-              { result:2, time:0, num:3 },
-              { result:0, time:0, num:0 },
-              { result:3, time:78, num:3 } ]},
-          { rank:3, userName:'UPC1', solve:3, time:564,
-            problem:[{ result:1, time:30, num:3 },
-              { result:1, time:45, num:1 },
-              { result:2, time:0, num:3 },
-              { result:3, time:178, num:5 },
-              { result:0, time:0, num:0 } ]},
-          { rank:4, userName:'UPC2', solve:3, time:1235,
-            problem:[{ result:1, time:45, num:9 },
-              { result:1, time:26, num:4 },
-              { result:1, time:76, num:6 },
-              { result:0, time:0, num:0 },
-              { result:0, time:0, num:0 } ]},
-        ]
+      return {
+        data: [],
+        rank: [],
+        problemSet: [],
+        title:''
       }
+    },
+    async created() {
+      let routerParams = this.$route.params.problemSet;
+      let contestId = this.$route.params.contestId;
+      if(routerParams){ this.problemSet = routerParams; }
+      let title = this.$route.params.title;
+      if(title){ this.title = title; }
+      var res = await this.axios.get('/api/submission/rank',{
+        params:{
+          contestId: contestId
+        }
+      });
+      this.data = res.data
+      console.log(this.data)
+      this.data.forEach((item,i) => {
+        var user = { rank: item.rankId, username: item.username, solve: item.solveNum, time:0,
+          problem:[{ status:-1, time:0, tries:0 }, { status:-1, time:0, tries:0 }, { status:-1, time:0, tries:0 },
+            { status:-1, time:0, tries:0 }, { status:-1, time:0, tries:0 } ] }
+        item.problem.forEach((items,j) => {
+          this.problemSet.forEach((ite,k) => {
+            if(ite.problemId == items.problemId ){
+              user.problem[k].status = items.status;
+              user.problem[k].time = items.time;
+              user.problem[k].tries = items.tries;
+              user.time += items.time + (items.tries - 1)*20;
+            }
+          });
+        });
+        this.rank.push(user)
+      });
+    },
+    mounted() {
+      if (sessionStorage.getItem("userId") ) { var userId = sessionStorage.getItem('userId'); }
+      this.websocket = new WebSocket("ws://39.106.167.190:8080/judgeHandler/ID="+userId)
+      this.initWebSocket()
+    },
+    beforeDestroy () {
+      this.onbeforeunload()
     },
     methods:{
       resultColor(res){
-        if(res == 0){
-          return '#FFFFFF'
+        if(res == -1){ return '#FFFFFF' }
+        else if(res == 1){ return '#AAE6AA' }
+        else if(res==0){ return '#FF7256' }
+        else{ return '#3CB371' }
+      },
+      initWebSocket () {
+        this.websocket.onerror = this.setErrorMessage
+        this.websocket.onmessage = this.setOnmessageMessage
+        window.onbeforeunload = this.onbeforeunload
+      },
+      setOnmessageMessage (event) {
+        if(event.data == 'rank'){
+          this.update();
         }
-        else if(res == 1){
-          return '#AAE6AA'
-        }
-        else if(res==2){
-          return '#FF7256'
-        }
-        else{
-          return '#3CB371'
-        }
+        console.log('服务端返回：' + event.data)
+      },
+      setErrorMessage () {
+        console.log('WebSocket连接发生错误   状态码：' + this.websocket.readyState)
+      },
+      onbeforeunload () {
+        this.websocket.close();
       }
     }
   }
 </script>
 
 <style>
-  .back{
+  .rankBack{
     width: 80%;
     background: white;
-    position: absolute;
     margin-left: 10%;
-    margin-top: 70px;
+    margin-top: 10%;
+    position: absolute;
   }
   table{
     width: 94%;

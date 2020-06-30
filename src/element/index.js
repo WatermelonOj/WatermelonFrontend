@@ -2,7 +2,8 @@ import {Select, Option, OptionGroup, Input, Tree, Dialog,
         Row, Col, Button, Tag , Carousel, CarouselItem,
         Form, Progress, Tabs, TabPane, Collapse, CollapseItem,
         Pagination, Link, Loading , Avatar, Icon, Badge, Card,
-        Divider, Dropdown, DropdownMenu, DropdownItem, Menu, MenuItem} from 'element-ui'
+        Divider, Dropdown, DropdownMenu, DropdownItem, Menu,
+        MenuItem, Popconfirm, Message, Popover,Upload,Image} from 'element-ui'
 const element = {
   install: function (Vue) {
     Vue.use(Select)
@@ -36,6 +37,12 @@ const element = {
     Vue.use(DropdownItem)
     Vue.use(Menu)
     Vue.use(MenuItem)
+    Vue.use(Popconfirm)
+    Vue.component(Message )
+    Vue.prototype.$message = Message
+    Vue.use(Popover)
+    Vue.use(Upload)
+    Vue.use(Image)
   }
 }
 export default element

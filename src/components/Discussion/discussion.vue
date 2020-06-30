@@ -1,53 +1,42 @@
 <template>
-  <div class="back">
-    <div style="float: left;margin-top: 10px;margin-left: 10px;">
-      <el-avatar :size="80" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+  <div style="margin-top: 10%;position: absolute;width: 100%">
+    <div class="discussionBackground">
+      <el-row v-for="(item,index) in commentSet" :key="index">
+        <el-col style="margin-bottom: 20px">
+          <discussion-card :comment="item"></discussion-card>
+        </el-col>
+      </el-row>
     </div>
-    <div style="float: left;margin-left: 20px">
-      <h3>admin</h3>
-      <span style="font-size: 13px;color: #a6a9ad">
-        2020-4-20
-        <i style="margin-left: 15px" class="el-icon-view"></i>
-        13244
-      </span>
-    </div>
-
-    <div style="font-size: 25px;float: right;color: #B4BCCC;margin-top: 60px">
-      <div style="float: left;margin-top: 5px;margin-right: 5px"><i class="el-icon-s-comment"></i></div>
-      <div style="float: left;margin-right: 30px"><span style="font-size: 15px">评论</span></div>
-      <div style="float: left;margin-top: 5px;margin-right: 5px"><i class="el-icon-s-flag"></i></div>
-      <div style="float: left;margin-right: 30px"><span style="font-size: 15px">举报</span></div>
-    </div>
-
-    <div class="line"></div>
+    <logo></logo>
   </div>
 </template>
 
 <script>
+  import discussionCard from "./discussionCard";
+  import logo from "../Other/logo";
   export default {
     name: "discussion",
+    components:{ discussionCard, logo },
     data(){
       return{
-
+        commentSet:[]
       }
+    },
+    async created() {
+      if (sessionStorage.getItem("userId") ) { var userId = sessionStorage.getItem('userId'); }
+      var res = await this.axios.get('/pro/comment/user',{
+        params:{
+          passerId:userId
+        }
+      });
+      this.commentSet = res.data
     }
   }
 </script>
 
 <style scoped>
-  .back{
+  .discussionBackground{
     width: 70%;
-    background: white;
-    position: absolute;
     margin-left: 15%;
-    margin-top: 70px;
-    height: 600px;
-  }
-  .line{
-    width: 96%;
-    margin-left: 2%;
-    margin-top: 100px;
-    background-color: rgb(240,240,242);
-    height: 1px;
   }
 </style>
